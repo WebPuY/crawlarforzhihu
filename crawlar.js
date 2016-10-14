@@ -7,31 +7,61 @@ var https = require('https')
 
 function filterHtml(html){
     var $ = cheerio.load(html);
-    var noscriptImgs = $('noscript img');
+    var noscriptImgs = $('.zm-item-rich-text img');
     var imgData = [];
-    noscriptImgs.each(function(item){
+    noscriptImgs.each(function(){
+
         var noscriptImg = $(this);
+
         var imgsSrc = noscriptImg.attr('src');
-        // console.log(imgsSrc);
-        var filename = parseUrlForFileName(imgsSrc);
-        downloadImg(imgsSrc,filename,function(err) {
+
+        imgData.push(imgsSrc);
+        
+        return imgData;
+    });
+
+    var newArr = addHttpsForArray(imgData);
+    // console.log(newArr);
+
+    newArr.map(function(item){
+
+        var filename = parseUrlForFileName(item);
+
+        downloadImg(item,filename,function(err) {
             if(err){
                 console.log(err);
             }
             console.log(filename + ' done');
-        });
-
-        imgData.push(imgsSrc);
-        return imgData;
+            console.log('首屏照片已经下载完成，下面需要模拟接口');
+        });;
     });
-    console.log(imgData);
 }
 
+// 获取下载文件的时候的文件名
 function parseUrlForFileName(address) {
     var filename = path.basename(address);
     return filename;
 }
 
+//给字符串增加https 
+function addHttpsForString(string){
+    if(string.indexOf('https') === -1 ){
+        string = 'https' + string;
+    }
+    return string;
+}
+
+// 给数组增加https
+function addHttpsForArray(arr){
+    for( var i=0; i<arr.length; i++ ){
+        if( arr[i].indexOf( "https" ) === -1 ) {
+            arr[i] = "https:" + arr[i];
+        }
+    }
+    return arr;
+}
+
+// 下载到本地制定images文件夹
 function downloadImg(url, filename, callback){
     request.head(url, function(err, res, body){
         if (err) {
