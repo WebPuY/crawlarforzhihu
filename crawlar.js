@@ -3,15 +3,25 @@ var https = require('https')
     ,cheerio = require('cheerio')
     ,path = require('path')
     ,fs = require('fs')
+    ,$ = require('jquery')
     ,url = 'https://www.zhihu.com/question/35846840';
 
 function filterHtml(html){
-    var $ = cheerio.load(html);
-    var noscriptImgs = $('.zm-item-rich-text img');
+    var _ = cheerio.load(html);
+    var noscriptImgs = _('.zm-item-rich-text img');
+
+    // var clickMore = &('.zu-button-more');
+   
+    // clickMore.click(function(){
+    //     console.log('click me');
+    // });
+
+    // clickMore.trigger('click');
+
     var imgData = [];
     noscriptImgs.each(function(){
 
-        var noscriptImg = $(this);
+        var noscriptImg = _(this);
 
         var imgsSrc = noscriptImg.attr('src');
 
@@ -32,9 +42,14 @@ function filterHtml(html){
                 console.log(err);
             }
             console.log(filename + ' done');
-            console.log('首屏照片已经下载完成，下面需要模拟接口');
-        });;
+        });    
     });
+    
+}
+
+// 获取各个答案的答主名称并作为文件夹名
+function createFileName(){
+
 }
 
 // 获取下载文件的时候的文件名
@@ -68,7 +83,9 @@ function downloadImg(url, filename, callback){
             console.log('err: '+ err);
             return false;
         }
-        request(url).pipe(fs.createWriteStream('images/'+filename)).on('close', callback);
+        request(url)
+            .pipe(fs.createWriteStream('images/'+filename))
+            .on('close', callback);
     });
 };
 
@@ -83,3 +100,5 @@ https.get(url,function(res){
 }).on('error',function(){
     console.log('Error');
 });
+
+
